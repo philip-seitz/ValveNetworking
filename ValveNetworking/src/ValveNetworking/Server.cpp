@@ -93,16 +93,16 @@ namespace ValveNetworking
 
 	void Server::Run(uint16 port)
 	{
-		InitSteamDatagramConnectionSockets();		// init API
-		LocalUserInput_Init();						// setup user input thread (~non blocking)
+		m_Running = false;
+		InitSteamDatagramConnectionSockets();			// init API
+		LocalUserInput_Init();							// setup user input thread (~non blocking)
 		m_Interface = SteamNetworkingSockets();
 		m_Port = port;
-		m_Running = false;
 
 		// start Listener
 		SteamNetworkingIPAddr serverLocalAddr;
-		serverLocalAddr.Clear();					// IP set to zero
-		serverLocalAddr.m_port = m_Port;			// server listening port
+		serverLocalAddr.Clear();						// IP set to zero
+		serverLocalAddr.m_port = m_Port;				// server listening port
 		SteamNetworkingConfigValue_t options;			// options stored in struct (e.g. pointer storing status changed callback)
 		options.SetPtr(k_ESteamNetworkingConfig_Callback_ConnectionStatusChanged, (void*)NetConnectionStatusChangedCallback);
 		m_ListenSocket = m_Interface->CreateListenSocketIP(serverLocalAddr, 1, &options);	// doesn't use IP; client rather connects to server IP 
@@ -117,9 +117,9 @@ namespace ValveNetworking
 
 		while (!m_Running)
 		{
-			HandleIncomingMessages();				// poll messages coming from connection (+print)
-			HandleConnectionStateChanges();			// print notis on connections/dcs etc.
-			HandleLocalUserInput();					// poll user messages and send to connection
+			HandleIncomingMessages();					// poll messages coming from connection (+print)
+			HandleConnectionStateChanges();				// print notis on connections/dcs etc.
+			HandleLocalUserInput();						// poll user messages and send to connection
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));		// reduce polling frequency to lower load
 		}
 
