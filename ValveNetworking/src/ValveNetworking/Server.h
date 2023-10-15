@@ -1,4 +1,5 @@
 #pragma once
+#define STEAMNETWORKINGSOCKETS_OPENSOURCE
 #include <steam/steamnetworkingsockets.h>
 #include <steam/isteamnetworkingutils.h>
 #ifndef STEAMNETWORKINGSOCKETS_OPENSOURCE
