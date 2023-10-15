@@ -11,12 +11,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\ValveNetworking\Application.h" />
+    <ClInclude Include="src\ValveNetworking\EntryPoint.h" />
     <ClInclude Include="src\ValveNetworking\NetworkingUtils.h" />
     <ClInclude Include="src\ValveNetworking.h" />
     <ClInclude Include="src\ValveNetworking\Core.h" />
     <ClInclude Include="src\ValveNetworking\Server.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\ValveNetworking\Application.cpp" />
     <ClCompile Include="src\ValveNetworking\NetworkingUtils.cpp" />
     <ClCompile Include="src\ValveNetworking\Server.cpp" />
   </ItemGroup>

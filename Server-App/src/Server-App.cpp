@@ -1,5 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #define STEAMNETWORKINGSOCKETS_OPENSOURCE
+#include "Server-App.h"
 #include "ValveNetworking.h"
 #include <chrono>
 #include <thread>
@@ -13,8 +14,7 @@
 #include <signal.h>
 #endif
 
-// We do this because I won't want to figure out how to cleanly shut
-// down the thread that is reading from stdin.
+// TODO: clean up and maybe move to lib
 static void NukeProcess(int rc)
 {
 #ifdef _WIN32
@@ -24,13 +24,29 @@ static void NukeProcess(int rc)
 
 const uint16 DEFAULT_SERVER_PORT = 27020;
 
-int main()
+ServerApp::ServerApp()
 {
-	SteamNetworkingIPAddr addrServer;	// Server IP address
-	addrServer.Clear();					// server IP and port set to zero
+	m_ServerAddress.Clear();
+}
 
-	ValveNetworking::Server server;
-	server.Run((uint16)DEFAULT_SERVER_PORT);
+ServerApp::~ServerApp() 
+{
 
+}
+
+void ServerApp::Run()
+{
+	m_Server.Run((uint16)DEFAULT_SERVER_PORT);
 	NukeProcess(0);
 }
+
+//int main()
+//{
+//	SteamNetworkingIPAddr addrServer;	// Server IP address
+//	addrServer.Clear();					// server IP and port set to zero
+//
+//	ValveNetworking::Server server;
+//	server.Run((uint16)DEFAULT_SERVER_PORT);
+//
+//	NukeProcess(0);
+//}
