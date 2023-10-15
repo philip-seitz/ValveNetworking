@@ -2,9 +2,6 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\dev\ValveNetworking\bin\Debug-x64\ValveNetworking\ValveNetworking.dll</FullPath>
-    </ProjectOutput>
-    <ProjectOutput>
       <FullPath>C:\dev\ValveNetworking\bin\Debug-x64\Server-App\Server-App.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>

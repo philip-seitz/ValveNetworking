@@ -6,7 +6,6 @@
 #include <queue>
 #include <stdarg.h>
 
-
 namespace ValveNetworking
 {
 	Server* s_CallbackInstance = nullptr;
@@ -355,7 +354,6 @@ namespace ValveNetworking
 			// Silences -Wswitch
 			break;
 		}
-
 	}
 
 	void Server::NetConnectionStatusChangedCallback(SteamNetConnectionStatusChangedCallback_t* pInfo)

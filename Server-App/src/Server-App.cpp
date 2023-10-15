@@ -1,3 +1,5 @@
+#define _CRT_SECURE_NO_WARNINGS
+#define STEAMNETWORKINGSOCKETS_OPENSOURCE
 #include "ValveNetworking.h"
 #include <chrono>
 #include <thread>
