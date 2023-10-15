@@ -12,10 +12,11 @@
 #include <queue>
 #include <string>
 #include <stdarg.h>
+#include "Core.h"
 
 
 namespace ValveNetworking {
-	class Server
+	class VN_API Server
 	{
 	public:
 		void Run(uint16 port);

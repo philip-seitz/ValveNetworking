@@ -97,6 +97,7 @@ namespace ValveNetworking
 		LocalUserInput_Init();						// setup user input thread (~non blocking)
 		m_Interface = SteamNetworkingSockets();
 		m_Port = port;
+		m_Running = false;
 
 		// start Listener
 		SteamNetworkingIPAddr serverLocalAddr;
