@@ -20,6 +20,7 @@ namespace ValveNetworking {
 	{
 	public:
 		void Run(uint16 port);
+		void StopProcess(int rc);
 
 	private:
 		bool m_Running;

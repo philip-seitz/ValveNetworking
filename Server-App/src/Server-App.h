@@ -1,5 +1,5 @@
 #pragma once
-#include "ValveNetworking.h"
+#include <ValveNetworking.h>
 
 class ServerApp : public ValveNetworking::Application
 {

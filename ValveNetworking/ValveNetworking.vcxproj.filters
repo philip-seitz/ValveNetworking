@@ -33,6 +33,9 @@
     <ClInclude Include="src\ValveNetworking\EntryPoint.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="src\ValveNetworking\Client.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ValveNetworking\Server.cpp">
@@ -42,6 +45,9 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="src\ValveNetworking\Application.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ValveNetworking\Client.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>

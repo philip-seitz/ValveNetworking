@@ -13,9 +13,6 @@ namespace ValveNetworking
 
 	private:
 
-
-
-
 	};
 
 	// Implementation template for Client

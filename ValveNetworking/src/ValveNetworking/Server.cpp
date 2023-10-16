@@ -6,25 +6,72 @@
 #include <queue>
 #include <stdarg.h>
 
+#ifdef _WIN32
+#include <windows.h>		// For StopProcess
+#else
+#include <unistd.h>
+#include <signal.h>
+#endif
+
 namespace ValveNetworking
 {
 	Server* s_CallbackInstance = nullptr;
+	void Server::Run(uint16 port)
+	{
+		m_Running = true;
+		InitSteamDatagramConnectionSockets();			// init API
+		LocalUserInput_Init();							// setup user input thread (~non blocking)
+		m_Interface = SteamNetworkingSockets();
+		m_Port = port;
 
+		// start Listener
+		SteamNetworkingIPAddr serverLocalAddr;
+		serverLocalAddr.Clear();						// IP set to zero
+		serverLocalAddr.m_port = m_Port;				// server listening port
+		SteamNetworkingConfigValue_t options;			// options stored in struct (e.g. pointer storing status changed callback)
+		options.SetPtr(k_ESteamNetworkingConfig_Callback_ConnectionStatusChanged, (void*)NetConnectionStatusChangedCallback);
+		m_ListenSocket = m_Interface->CreateListenSocketIP(serverLocalAddr, 1, &options);	// doesn't use IP; client rather connects to server IP 
+		if (m_ListenSocket == k_HSteamListenSocket_Invalid)
+			PrintfTime("Failed to listen on port %d", m_Port);
+
+		m_PollGroup = m_Interface->CreatePollGroup();
+		if (m_PollGroup == k_HSteamNetPollGroup_Invalid)
+			PrintfTime("Failed to listen on port %d", m_Port);
+
+		PrintfTime("Server listening on port %d\n", m_Port);
+
+		while (m_Running)
+		{
+			HandleIncomingMessages();					// poll messages coming from connection (+print)
+			HandleConnectionStateChanges();				// print notis on connections/dcs etc.
+			HandleLocalUserInput();						// poll user messages and send to connection
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));		// reduce polling frequency to lower load
+		}
+
+		ShutdownSteamDatagramConnectionSockets();
+		StopProcess(0);
+	}
+
+	void Server::StopProcess(int rc)
+	{
+#ifdef _WIN32
+			ExitProcess(rc);
+#endif
+	}
+		
 	void Server::LocalUserInput_Init()
 	{
 		m_InputThread = new std::thread([this]()
 			{
 				// thread code defined via lambda function
-				while (!m_Running)
+				while (m_Running)
 				{
 					char szLine[4000];
 					if (!fgets(szLine, sizeof(szLine), stdin))		// write user input (console) to szLine 
 					{
-						// Well, you would hope that you could close the handle
-						// from the other thread to trigger this.  Nope.
-						if (m_Running)
+						if (!m_Running)
 							return;
-						m_Running = true;
+						m_Running = false;
 						PrintfTime("Failed to read on stdin, quitting\n");
 						break;		// end thread execution
 					}
@@ -91,41 +138,6 @@ namespace ValveNetworking
 
 	}
 
-	void Server::Run(uint16 port)
-	{
-		m_Running = false;
-		InitSteamDatagramConnectionSockets();			// init API
-		LocalUserInput_Init();							// setup user input thread (~non blocking)
-		m_Interface = SteamNetworkingSockets();
-		m_Port = port;
-
-		// start Listener
-		SteamNetworkingIPAddr serverLocalAddr;
-		serverLocalAddr.Clear();						// IP set to zero
-		serverLocalAddr.m_port = m_Port;				// server listening port
-		SteamNetworkingConfigValue_t options;			// options stored in struct (e.g. pointer storing status changed callback)
-		options.SetPtr(k_ESteamNetworkingConfig_Callback_ConnectionStatusChanged, (void*)NetConnectionStatusChangedCallback);
-		m_ListenSocket = m_Interface->CreateListenSocketIP(serverLocalAddr, 1, &options);	// doesn't use IP; client rather connects to server IP 
-		if (m_ListenSocket == k_HSteamListenSocket_Invalid)
-			PrintfTime("Failed to listen on port %d", m_Port);
-
-		m_PollGroup = m_Interface->CreatePollGroup();
-		if (m_PollGroup == k_HSteamNetPollGroup_Invalid)
-			PrintfTime("Failed to listen on port %d", m_Port);
-
-		PrintfTime("Server listening on port %d\n", m_Port);
-
-		while (!m_Running)
-		{
-			HandleIncomingMessages();					// poll messages coming from connection (+print)
-			HandleConnectionStateChanges();				// print notis on connections/dcs etc.
-			HandleLocalUserInput();						// poll user messages and send to connection
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));		// reduce polling frequency to lower load
-		}
-
-		ShutdownSteamDatagramConnectionSockets();
-	}
-
 	void Server::SendStringToClient(HSteamNetConnection conn, const char* str)
 	{
 		m_Interface->SendMessageToConnection(conn, str, (uint32)strlen(str), k_nSteamNetworkingSend_Reliable, nullptr);
@@ -144,7 +156,7 @@ namespace ValveNetworking
 	{
 		char temp[1024];
 
-		while (!m_Running)
+		while (m_Running)
 		{
 			ISteamNetworkingMessage* pIncomingMsg = nullptr;
 			int numMsgs = m_Interface->ReceiveMessagesOnPollGroup(m_PollGroup, &pIncomingMsg, 1);
@@ -192,15 +204,14 @@ namespace ValveNetworking
 	void Server::HandleLocalUserInput()
 	{
 		std::string cmd;
-		while (!m_Running && LocalUserInput_GetNext(cmd))
+		while (m_Running && LocalUserInput_GetNext(cmd))
 		{
 			if (strcmp(cmd.c_str(), "/quit") == 0)
 			{
-				m_Running = true;
+				m_Running = false;
 				PrintfTime("Shutting down server");
 				break;
 			}
-
 			// That's the only command we support
 			PrintfTime("The server only knows one command: '/quit'");
 		}

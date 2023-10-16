@@ -3,6 +3,7 @@
 // For use by server or client applications
 #include "ValveNetworking/Core.h"
 #include "ValveNetworking/Server.h"
+#include "ValveNetworking/Client.h"
 #include "ValveNetworking/NetworkingUtils.h"
 #include "ValveNetworking/Application.h"
 
