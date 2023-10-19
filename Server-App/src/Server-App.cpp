@@ -23,5 +23,11 @@ ServerApp::~ServerApp()
 
 void ServerApp::Run()
 {
+
+	// m_Server.StartListening // init and start of listening
+	// while m_Server.m_Running
+		// message / input polling	   (on event)	-> i.e. /move_r -> update pos to the right; normal msgs aswell...
+
+
 	m_Server.Run((uint16)DEFAULT_SERVER_PORT);
 }

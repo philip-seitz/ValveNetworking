@@ -1,5 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "Server.h"
+#include "Client.h"
 #include "NetworkingUtils.h"
 #include <thread>
 #include <mutex>
@@ -152,6 +153,15 @@ namespace ValveNetworking
 		}
 	}
 
+	void Server::SendFloatToClient(HSteamNetConnection conn, uint8 nmbr)
+	{
+		uint32 size = 1;
+		void* data = new uint8[size];
+		*(uint8*)data = nmbr;
+		m_Interface->SendMessageToConnection(conn, &data, uint32(size), k_nSteamNetworkingSend_Reliable, nullptr);
+		delete[] data;
+	}
+
 	void Server::HandleIncomingMessages()
 	{
 		char temp[1024];
@@ -181,24 +191,28 @@ namespace ValveNetworking
 					++nick;
 
 				// Let everybody else know they changed their name (evry1 except name changer)
-				sprintf(temp, "%s shall henceforth be known as %s", itClient->second.nickname.c_str(), nick);
+				sprintf(temp, "%s renamed to %s", itClient->second.nickname.c_str(), nick);
 				// replacing default value it should send it to all clients exept the one who renamed
 				SendStringToAllClients(temp, itClient->first);
 
 				// Respond to client (namechanger)
-				sprintf(temp, "Ye shall henceforth be known as %s", nick);
+				sprintf(temp, "You renamed to %s", nick);
 				SendStringToClient(itClient->first, temp);
-
+				
 				// Actually change their name
 				SetClientNickname(itClient->first, nick);
 				continue;
+			}
+
+			if (strcmp(cmd, "MOVE_UP") == 0)
+			{
+				SendStringToClient(itClient->first, "MOVE_UP");
 			}
 
 			// Assume it's just a ordinary chat message, dispatch to everybody else
 			sprintf(temp, "%s: %s", itClient->second.nickname.c_str(), cmd);
 			SendStringToAllClients(temp, itClient->first);
 		}
-
 	}
 
 	void Server::HandleLocalUserInput()

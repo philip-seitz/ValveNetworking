@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ValveNetworking", "ValveNet
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Client-App", "Client-App\Client-App.vcxproj", "{23C49623-CC66-4E94-A874-A2964E05B2F9}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Graphics", "Graphics\Graphics.vcxproj", "{DB054BE4-0C70-4E13-97F7-C923E70EEDF9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -41,6 +43,14 @@ Global
 		{23C49623-CC66-4E94-A874-A2964E05B2F9}.Release|x64.Build.0 = Release|x64
 		{23C49623-CC66-4E94-A874-A2964E05B2F9}.Release|x86.ActiveCfg = Release|Win32
 		{23C49623-CC66-4E94-A874-A2964E05B2F9}.Release|x86.Build.0 = Release|Win32
+		{DB054BE4-0C70-4E13-97F7-C923E70EEDF9}.Debug|x64.ActiveCfg = Debug|x64
+		{DB054BE4-0C70-4E13-97F7-C923E70EEDF9}.Debug|x64.Build.0 = Debug|x64
+		{DB054BE4-0C70-4E13-97F7-C923E70EEDF9}.Debug|x86.ActiveCfg = Debug|Win32
+		{DB054BE4-0C70-4E13-97F7-C923E70EEDF9}.Debug|x86.Build.0 = Debug|Win32
+		{DB054BE4-0C70-4E13-97F7-C923E70EEDF9}.Release|x64.ActiveCfg = Release|x64
+		{DB054BE4-0C70-4E13-97F7-C923E70EEDF9}.Release|x64.Build.0 = Release|x64
+		{DB054BE4-0C70-4E13-97F7-C923E70EEDF9}.Release|x86.ActiveCfg = Release|Win32
+		{DB054BE4-0C70-4E13-97F7-C923E70EEDF9}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

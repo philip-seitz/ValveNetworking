@@ -7,3 +7,5 @@ bin-int/
 *.user
 /Client-App/Client-App.vcxproj
 /Client-App/Client-App.vcxproj.filters
+/Client-App/src/vendor/glm/detail
+/Client-App/src/vendor/glm/ext

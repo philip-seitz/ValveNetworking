@@ -7,38 +7,115 @@
 #include <stdarg.h>
 #include <windows.h>
 
+#include <glm/glm.hpp>
+#include <glm/common.hpp>
 #include "NetworkingUtils.h"
 
 namespace ValveNetworking
 {
 	Client* s_CallbackInstance = nullptr;
 
-	void Client::Run(const SteamNetworkingIPAddr& serverAddr)
+	bool Client::IsRunning()
+	{
+		return m_Running;
+	}
+
+	ConnectionStatus Client::GetConnectionStatus()
+	{
+		return m_ConnectionStatus;
+	}
+
+	void Client::Connect(const char* serverIP, const uint16 port)
 	{
 		m_Running = false;
 		InitSteamDatagramConnectionSockets();		// init API
 		LocalUserInput_Init();						// setup user input thread (~non blocking)
-
 		m_Interface = SteamNetworkingSockets();
+
+		// setup ip and port
+		SteamNetworkingIPAddr serverAddr;			
+		serverAddr.Clear();
+		serverAddr.ParseString(serverIP);
+		serverAddr.m_port = port;
 
 		// Start connecting
 		char address[SteamNetworkingIPAddr::k_cchMaxString];
-		serverAddr.ToString(address, sizeof(address), true);						// write IP to szAddr
+		serverAddr.ToString(address, sizeof(address), true);						// write IP to address for print
 		PrintfTime("Connecting to chat server at %s", address);
 		SteamNetworkingConfigValue_t options;
 		options.SetPtr(k_ESteamNetworkingConfig_Callback_ConnectionStatusChanged, (void*)NetConnectionStatusChangedCallback);
 		m_Connection = m_Interface->ConnectByIPAddress(serverAddr, 1, &options);	// try IP to connect
 		if (m_Connection == k_HSteamNetConnection_Invalid)
+		{
+			// Failed.
 			PrintfTime("Failed to create connection");
+		}
+		else
+		{
+			// Client init was successful, it is now running.
+			m_Running = true;
+		}
+	}
+
+	void Client::PollConnection()
+	{
+		HandleIncomingMessages();												// poll messages coming over connection (+print)
+		HandleConnectionStateChanges();											// print messages depending on connection/dcs etc.
+	}
+
+	void Client::PollInput()
+	{
+		HandleLocalUserInput();													// poll user messages and send them over connection
+	}
+	// message includes position of object and the commanded direction
+	
+	void Client::SendMovementInfo(MovementDirection dir)
+	{
+		switch (dir)
+		{
+			case MOVE_UP:
+			{
+				std::string msg = "MOVE_UP";
+				float temp = 33.0f;
+				m_Interface->SendMessageToConnection(m_Connection, msg.c_str(), uint32(msg.length()), k_nSteamNetworkingSend_Reliable, nullptr);
+				break;
+			}
+		}
+	}
+
+	void Client::Shutdown()
+	{
+		ShutdownSteamDatagramConnectionSockets();
+		StopProcess(0);
+	}
+
+	void Client::Run(const SteamNetworkingIPAddr& serverAddr)
+	{
+		//m_Running = false;
+		//InitSteamDatagramConnectionSockets();			// init API
+		//LocalUserInput_Init();						// setup user input thread (~non blocking)
+
+		//m_Interface = SteamNetworkingSockets();
+
+		//// Start connecting
+		//char address[SteamNetworkingIPAddr::k_cchMaxString];
+		//serverAddr.ToString(address, sizeof(address), true);						// write IP to szAddr
+		//PrintfTime("Connecting to chat server at %s", address);
+		//SteamNetworkingConfigValue_t options;
+		//options.SetPtr(k_ESteamNetworkingConfig_Callback_ConnectionStatusChanged, (void*)NetConnectionStatusChangedCallback);
+		//m_Connection = m_Interface->ConnectByIPAddress(serverAddr, 1, &options);	// try IP to connect
+		//if (m_Connection == k_HSteamNetConnection_Invalid)
+		//	PrintfTime("Failed to create connection");
 
 		while (!m_Running)
 		{
-			HandleIncomingMessages();										// poll messages coming over connection (+print)
-			HandleConnectionStateChanges();									// print messages depending on connection/dcs etc.
-			HandleLocalUserInput();											// poll user messages and send them over connection
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));		// reduce polling frequency to lower load
+			HandleIncomingMessages();												// poll messages coming over connection (+print)
+			HandleConnectionStateChanges();											// print messages depending on connection/dcs etc.
+			HandleLocalUserInput();													// poll user messages and send them over connection
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));				// reduce polling frequency to lower load
 		}
 		ShutdownSteamDatagramConnectionSockets();
+		StopProcess(0);
 	}
 
 	void Client::StopProcess(int rc)
@@ -50,7 +127,7 @@ namespace ValveNetworking
 
 	void Client::HandleIncomingMessages()
 	{
-		while (!m_Running)
+		while (m_Running)
 		{
 			ISteamNetworkingMessage* pIncomingMsg = nullptr;
 			int numMsgs = m_Interface->ReceiveMessagesOnConnection(m_Connection, &pIncomingMsg, 1);
@@ -58,6 +135,20 @@ namespace ValveNetworking
 				break;
 			if (numMsgs < 0)
 				PrintfTime("Error checking for messages");
+
+
+			std::string sCmd;
+			sCmd.assign((const char*)pIncomingMsg->m_pData, pIncomingMsg->m_cbSize);
+			const char* cmd = sCmd.c_str();		// write message to sCmd (string)
+
+
+			if (strcmp(cmd, "MOVE_UP") == 0)
+			{
+				m_MovementQueue.push(MOVE_UP);
+				// We don't need this anymore.
+				pIncomingMsg->Release();
+				break;
+			}
 
 			// Just echo anything we get from the server
 			fwrite(pIncomingMsg->m_pData, 1, pIncomingMsg->m_cbSize, stdout);
@@ -71,12 +162,12 @@ namespace ValveNetworking
 	void Client::HandleLocalUserInput()
 	{
 		std::string cmd;
-		while (!m_Running && LocalUserInput_GetNext(cmd))		// read in new message (cmd) if any return true
+		while (m_Running && LocalUserInput_GetNext(cmd))		// read in new message (cmd) if any return true
 		{
 			// Check for known commands
 			if (strcmp(cmd.c_str(), "/quit") == 0)
 			{
-				m_Running = true;
+				m_Running = false;
 				PrintfTime("Disconnecting from chat server");
 
 				// Close the connection gracefully.
@@ -105,43 +196,39 @@ namespace ValveNetworking
 		case k_ESteamNetworkingConnectionState_ClosedByPeer:
 		case k_ESteamNetworkingConnectionState_ProblemDetectedLocally:	// detected problem currently
 		{
-			m_Running = true;
+			m_Running = false;
 
 			// Print an appropriate message
 			if (pInfo->m_eOldState == k_ESteamNetworkingConnectionState_Connecting)	// m_eOldState info of last state
 			{
 				// Note: we could distinguish between a timeout, a rejected connection,
 				// or some other transport problem. (connection failed)
-				PrintfTime("We sought the remote host, yet our efforts were met with defeat.  (%s)", pInfo->m_info.m_szEndDebug);
+				PrintfTime("Connection to host failed.  (%s)", pInfo->m_info.m_szEndDebug);
+				m_ConnectionStatus = CON_FAILED;
 			}
 			else if (pInfo->m_info.m_eState == k_ESteamNetworkingConnectionState_ProblemDetectedLocally)
 			{
-				PrintfTime("Alas, troubles beset us; we have lost contact with the host.  (%s)", pInfo->m_info.m_szEndDebug);
+				PrintfTime("Lost connection to host.  (%s)", pInfo->m_info.m_szEndDebug);
 			}
 			else
 			{
 				// NOTE: We could check the reason code for a normal disconnection
-				PrintfTime("The host hath bidden us farewell.  (%s)", pInfo->m_info.m_szEndDebug);
+				PrintfTime("Host disconnected.  (%s)", pInfo->m_info.m_szEndDebug);
 			}
 
-			// Clean up the connection.  This is important!
-			// The connection is "closed" in the network sense, but
-			// it has not been destroyed.  We must close it on our end, too
-			// to finish up.  The reason information do not matter in this case,
-			// and we cannot linger because it's already closed on the other end,
-			// so we just pass 0's.
+			// Clean up the connection
 			m_Interface->CloseConnection(pInfo->m_hConn, 0, nullptr, false);
 			m_Connection = k_HSteamNetConnection_Invalid;
 			break;
 		}
 
 		case k_ESteamNetworkingConnectionState_Connecting:
-			// We will get this callback when we start connecting.
-			// We can ignore this.
+			m_ConnectionStatus = CON_PENDING;
 			break;
 
 		case k_ESteamNetworkingConnectionState_Connected:
 			PrintfTime("Connected to server OK");
+			m_ConnectionStatus = CON_SUCCESS;
 			break;
 
 		default:
@@ -164,27 +251,27 @@ namespace ValveNetworking
 	void Client::LocalUserInput_Init()
 	{
 		m_InputThread = new std::thread([this]()
+		{
+			// thread code defined via lambda function
+			while (m_Running)
 			{
-				// thread code defined via lambda function
-				while (!m_Running)
+				char szLine[4000];
+				if (!fgets(szLine, sizeof(szLine), stdin))		// write user input (console) to szLine 
 				{
-					char szLine[4000];
-					if (!fgets(szLine, sizeof(szLine), stdin))		// write user input (console) to szLine 
-					{
-						// Well, you would hope that you could close the handle
-						// from the other thread to trigger this.  Nope.
-						if (m_Running)
-							return;
-						m_Running = true;
-						PrintfTime("Failed to read on stdin, quitting\n");
-						break;		// end thread execution
-					}
-
-					m_InputMutex.lock();
-					m_InputQueue.push(std::string(szLine));
-					m_InputMutex.unlock();
+					// Well, you would hope that you could close the handle
+					// from the other thread to trigger this.  Nope.
+					if (!m_Running)
+						return;
+					m_Running = false;
+					PrintfTime("Failed to read on stdin, quitting\n");
+					break;		// end thread execution
 				}
-			});
+
+				m_InputMutex.lock();
+				m_InputQueue.push(std::string(szLine));
+				m_InputMutex.unlock();
+			}
+		});
 	}
 
 	// Read the next line of input from stdin, if anything is available.

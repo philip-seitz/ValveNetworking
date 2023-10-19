@@ -47,6 +47,7 @@ namespace ValveNetworking {
 		static void NetConnectionStatusChangedCallback(SteamNetConnectionStatusChangedCallback_t* pInfo);
 		void SendStringToClient(HSteamNetConnection conn, const char* str);
 		void SendStringToAllClients(const char* str, HSteamNetConnection except = k_HSteamNetConnection_Invalid);
+		void SendFloatToClient(HSteamNetConnection conn, uint8 nmbr);
 		void HandleIncomingMessages();
 		void HandleLocalUserInput();
 		bool LocalUserInput_GetNext(std::string& result);

@@ -25,6 +25,9 @@
     <ClCompile Include="src\Client-App.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Graphics\Graphics.vcxproj">
+      <Project>{db054be4-0c70-4e13-97f7-c923e70eedf9}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\ValveNetworking\ValveNetworking.vcxproj">
       <Project>{fe39f5c3-77f7-493d-a9aa-a538548f7138}</Project>
     </ProjectReference>
@@ -101,15 +104,15 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>VN_PLATFORM_WINDOWS; </PreprocessorDefinitions>
+      <PreprocessorDefinitions>VN_PLATFORM_WINDOWS; GLEW_STATIC</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)ValveNetworking\src\; $(SolutionDir)Dependencies\GNS\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Graphics\src; $(SolutionDir)Client-App\src\vendor;$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include;$(SolutionDir)ValveNetworking\src\;$(SolutionDir)Dependencies\GNS\include\; $(SolutionDir)Graphics</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>GameNetworkingSockets.lib; $(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\GNS\lib\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib; glfw3.lib; glew32s.lib; GameNetworkingSockets.lib; $(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\GLFW\lib-vc2022; $(SolutionDir)Dependencies\GNS\lib\;$(SolutionDir)Dependencies\GLEW\lib\Release\x64</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -118,30 +121,32 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>VN_PLATFORM_WINDOWS; </PreprocessorDefinitions>
+      <PreprocessorDefinitions>VN_PLATFORM_WINDOWS; GLEW_STATIC</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)ValveNetworking\src\; $(SolutionDir)Dependencies\GNS\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Graphics\src; $(SolutionDir)Client-App\src\vendor;$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include;$(SolutionDir)ValveNetworking\src\;$(SolutionDir)Dependencies\GNS\include\; $(SolutionDir)Graphics</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\GLFW\lib-vc2022; $(SolutionDir)Dependencies\GNS\lib\;$(SolutionDir)Dependencies\GLEW\lib\Release\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib; glfw3.lib; glew32s.lib; GameNetworkingSockets.lib; $(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>VN_PLATFORM_WINDOWS; </PreprocessorDefinitions>
+      <PreprocessorDefinitions>VN_PLATFORM_WINDOWS; GLEW_STATIC</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)ValveNetworking\src\; $(SolutionDir)Dependencies\GNS\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Graphics\src; $(SolutionDir)Client-App\src\vendor;$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include;$(SolutionDir)ValveNetworking\src\;$(SolutionDir)Dependencies\GNS\include\; $(SolutionDir)Graphics</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>GameNetworkingSockets.lib; $(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\GNS\lib\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib; glfw3.lib; glew32s.lib; GameNetworkingSockets.lib; $(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\GLFW\lib-vc2022; $(SolutionDir)Dependencies\GNS\lib\;$(SolutionDir)Dependencies\GLEW\lib\Release\x64</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -150,15 +155,17 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>VN_PLATFORM_WINDOWS; </PreprocessorDefinitions>
+      <PreprocessorDefinitions>VN_PLATFORM_WINDOWS; GLEW_STATIC</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)ValveNetworking\src\; $(SolutionDir)Dependencies\GNS\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Graphics\src; $(SolutionDir)Client-App\src\vendor;$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Dependencies\GLEW\include;$(SolutionDir)ValveNetworking\src\;$(SolutionDir)Dependencies\GNS\include\; $(SolutionDir)Graphics</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\GLFW\lib-vc2022; $(SolutionDir)Dependencies\GNS\lib\;$(SolutionDir)Dependencies\GLEW\lib\Release\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib; glfw3.lib; glew32s.lib; GameNetworkingSockets.lib; $(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
