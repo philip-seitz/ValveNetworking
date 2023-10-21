@@ -29,7 +29,6 @@ namespace ValveNetworking
 	{
 		m_Running = false;
 		InitSteamDatagramConnectionSockets();		// init API
-		LocalUserInput_Init();						// setup user input thread (~non blocking)
 		m_Interface = SteamNetworkingSockets();
 
 		// setup ip and port
@@ -54,6 +53,7 @@ namespace ValveNetworking
 		{
 			// Client init was successful, it is now running.
 			m_Running = true;
+			LocalUserInput_Init();						// setup user input thread (~non blocking)
 		}
 	}
 
@@ -273,7 +273,7 @@ namespace ValveNetworking
 				{
 					// Well, you would hope that you could close the handle
 					// from the other thread to trigger this.  Nope.
-					if (!m_Running)
+					if (m_Running)
 						return;
 					m_Running = false;
 					PrintfTime("Failed to read on stdin, quitting\n");

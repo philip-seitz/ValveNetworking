@@ -8,7 +8,7 @@ const int window_width = 800;
 const int window_height = 400;
 
 const uint16 DEFAULT_SERVER_PORT = 27020;
-const char* serverIP = "192.168.178.157";
+const char* serverIP = "192.168.178.68";
 
 struct RendererData
 {
