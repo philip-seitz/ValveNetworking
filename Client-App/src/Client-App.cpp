@@ -8,7 +8,7 @@ const int window_width = 800;
 const int window_height = 400;
 
 const uint16 DEFAULT_SERVER_PORT = 27020;
-const char* serverIP = "2001:9e8:3860:bb00:8e60:e275:252b:1c50";
+const char* serverIP = "192.168.178.157";
 
 struct RendererData
 {
@@ -70,6 +70,7 @@ void ClientApp::Run()
 	float timer = 0.0f;
 
 	static bool w_pressed = false;
+	static bool s_pressed = false;
 
 	while (m_Client.IsRunning() && !glfwWindowShouldClose(m_Window.GetWindow()))
 	{
@@ -105,6 +106,14 @@ void ClientApp::Run()
 					w_handled = true;
 				}
 			}
+			else if (m_Client.m_MovementQueue.front() == ValveNetworking::MOVE_DOWN)
+			{
+				if (!s_handled)
+				{
+					m_Quad.m_Instance.position.y -= 0.4f;
+					s_handled = true;
+				}
+			}
 			m_Client.m_MovementQueue.pop();		// empty queue iteratively
 		}
 		glEnable(GL_DEPTH_TEST);
@@ -126,13 +135,22 @@ void ClientApp::Run()
 			w_pressed = false;
 			m_Client.SendMovementInfo(ValveNetworking::MovementDirection::MOVE_UP);
 		}
+		if (glfwGetKey(m_Window.GetWindow(), GLFW_KEY_S) == GLFW_PRESS)
+		{
+			s_pressed = true;
+		}
+		if (s_pressed && glfwGetKey(m_Window.GetWindow(), GLFW_KEY_S) == GLFW_RELEASE)
+		{
+			s_pressed = false;
+			m_Client.SendMovementInfo(ValveNetworking::MovementDirection::MOVE_DOWN);
+		}
+
 
 		// draw grid
 		sData.grid_shader->SetUniformMat4f("u_View", m_Camera2D.LookAtMatrix());
 		sData.grid_shader->SetUniformMat4f("u_Projection", m_Camera2D.ProjectionMatrix());
 		m_Grid_xy.Draw(sData.grid, sData.grid_shader);
-
-		// m_Quad.m_Instance.position = glm::vec3(m_Camera2D.Position().x, m_Camera2D.Position().y, m_Quad.m_Instance.position.z);		// move quad with camera
+		m_Camera2D.SetPosition({ m_Quad.m_Instance.position.x, m_Quad.m_Instance.position.y, m_Camera2D.Position().z});					// move camera with quad
 		sData.shader->SetUniformMat4f("u_View", m_Camera2D.LookAtMatrix());
 		sData.shader->SetUniformMat4f("u_Projection", m_Camera2D.ProjectionMatrix());
 		m_Quad.Draw(sData.shader, &sData.quad);

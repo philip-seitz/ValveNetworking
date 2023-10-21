@@ -209,6 +209,11 @@ namespace ValveNetworking
 				SendStringToClient(itClient->first, "MOVE_UP");
 			}
 
+			else if (strcmp(cmd, "MOVE_DOWN") == 0)
+			{
+				SendStringToClient(itClient->first, "MOVE_DOWN");
+			}
+
 			// Assume it's just a ordinary chat message, dispatch to everybody else
 			sprintf(temp, "%s: %s", itClient->second.nickname.c_str(), cmd);
 			SendStringToAllClients(temp, itClient->first);

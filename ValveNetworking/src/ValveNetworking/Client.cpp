@@ -80,6 +80,14 @@ namespace ValveNetworking
 				m_Interface->SendMessageToConnection(m_Connection, msg.c_str(), uint32(msg.length()), k_nSteamNetworkingSend_Reliable, nullptr);
 				break;
 			}
+			case MOVE_DOWN:
+			{
+				std::string msg = "MOVE_DOWN";
+				float temp = 33.0f;
+				m_Interface->SendMessageToConnection(m_Connection, msg.c_str(), uint32(msg.length()), k_nSteamNetworkingSend_Reliable, nullptr);
+				break;
+
+			}
 		}
 	}
 
@@ -141,11 +149,16 @@ namespace ValveNetworking
 			sCmd.assign((const char*)pIncomingMsg->m_pData, pIncomingMsg->m_cbSize);
 			const char* cmd = sCmd.c_str();		// write message to sCmd (string)
 
-
 			if (strcmp(cmd, "MOVE_UP") == 0)
 			{
 				m_MovementQueue.push(MOVE_UP);
 				// We don't need this anymore.
+				pIncomingMsg->Release();
+				break;
+			}
+			else if (strcmp(cmd, "MOVE_DOWN") == 0)
+			{
+				m_MovementQueue.push(MOVE_DOWN);
 				pIncomingMsg->Release();
 				break;
 			}

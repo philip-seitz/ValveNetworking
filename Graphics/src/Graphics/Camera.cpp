@@ -252,4 +252,10 @@ namespace Graphics
 		// update matrix
 		m_look_at = glm::lookAtRH(m_position, m_target, m_up);
 	}
+	const void Camera::SetPosition(glm::vec3 position)
+	{
+		m_position = position;
+		m_target = m_position + m_look_direction;
+		m_look_at = glm::lookAtRH(m_position, m_target, m_up);
+	}
 }
