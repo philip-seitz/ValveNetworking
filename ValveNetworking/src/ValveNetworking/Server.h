@@ -19,7 +19,12 @@ namespace ValveNetworking {
 	class VN_API Server
 	{
 	public:
+		bool IsRunning();
 		void Run(uint16 port);
+		void StartListening(uint16 port);
+		void PollConnection();
+		void PollInput();
+		void Shutdown();
 		void StopProcess(int rc);
 
 	private:

@@ -146,6 +146,8 @@ void ClientApp::Run()
 		}
 
 
+		// TODO: (optional) Error happens here (for exe client)
+
 		// draw grid
 		sData.grid_shader->SetUniformMat4f("u_View", m_Camera2D.LookAtMatrix());
 		sData.grid_shader->SetUniformMat4f("u_Projection", m_Camera2D.ProjectionMatrix());
